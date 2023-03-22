@@ -4,6 +4,10 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Unit test for simple App.
  */
@@ -27,38 +31,47 @@ public class ThrottlingQueueTest extends TestCase {
     /**
      * Rigourous Test :-)
      */
-    public void testThrottlingQueue_1() {
+    public void testThrottlingQueueExampleOne() {
         ThrottlingQueue<Integer> testQueue = new ThrottlingQueueImpl<>(10);
-        testQueue.enqueue(4,4);
-        testQueue.enqueue(1,1);
-        testQueue.enqueue(3,3);
-        testQueue.enqueue(2,2);
-        testQueue.enqueue(1,1);
-        testQueue.enqueue(2,2);
+        testQueue.enqueue(4, 4);
+        testQueue.enqueue(1, 1);
+        testQueue.enqueue(3, 3);
+        testQueue.enqueue(2, 2);
+        testQueue.enqueue(1, 1);
+        testQueue.enqueue(2, 2);
 
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
-        testQueue.enqueue(1,1);
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
+        List<Integer> results = new ArrayList<>();
+
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        testQueue.enqueue(1, 1);
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+
+        assertEquals(Arrays.asList(1, 1, 2, 1, 2, 3, 4), results);
     }
 
-    public void testThrottlingQueue_2() {
+    public void testThrottlingQueueExampleTwo() {
         ThrottlingQueue<Integer> testQueue = new ThrottlingQueueImpl<>(10);
-        testQueue.enqueue(4,4);
-        testQueue.enqueue(1,1);
-        testQueue.enqueue(3,3);
-        testQueue.enqueue(2,2);
-        testQueue.enqueue(2,2);
+        testQueue.enqueue(4, 4);
+        testQueue.enqueue(1, 1);
+        testQueue.enqueue(3, 3);
+        testQueue.enqueue(2, 2);
+        testQueue.enqueue(2, 2);
 
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
-        testQueue.enqueue(1,1);
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
-        System.out.println(testQueue.dequeue());
+        List<Integer> results = new ArrayList<>();
+
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        testQueue.enqueue(1, 1);
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+
+        assertEquals(Arrays.asList(1, 2, 1, 2, 3, 4), results);
     }
 }

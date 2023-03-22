@@ -155,3 +155,9 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
         }
     }
 }
+/*
+    TODO: java docs
+    TODO: add custom exceptions
+    TODO: double check thread safety
+    TODO: think about replacing brut-force solution with more elegant one
+ */
