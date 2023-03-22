@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
     private final Object key = new Object();
 
-    private enum ThrottleConstants {
+    enum ThrottleConstants {
         DEFAULT_THROTTLE_RATE(2),
         DEFAULT_PRIORITY(1),
 
@@ -37,11 +37,11 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
             this.exceptionMessage = value;
         }
 
-        private Integer asInteger() {
+        Integer asInteger() {
             return defaultValue;
         }
 
-        private String asString() {
+        String asString() {
             return exceptionMessage;
         }
     }
@@ -179,6 +179,3 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
         }
     }
 }
-/*
-    TODO: java docs
- */
