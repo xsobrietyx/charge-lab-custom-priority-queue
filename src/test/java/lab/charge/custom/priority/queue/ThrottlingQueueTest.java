@@ -111,15 +111,36 @@ public class ThrottlingQueueTest extends TestCase {
         }
     }
 
-    public void testFullQueueExceptionThrown() throws ThrottleQueueException {
+    public void testFullQueueExceptionThrown() {
         ThrottlingQueue<Integer> testQueue = new ThrottlingQueueImpl<>(1);
-        testQueue.enqueue(1, 1);
         try {
+            testQueue.enqueue(1, 1);
             testQueue.enqueue(1, 2);
         } catch (ThrottleQueueException e) {
             assertEquals(EXCEPTION_PREFIX + ThrottleConstants.EXCEPTION_QUEUE_FULL.asString(),
                     e.getMessage());
         }
 
+    }
+
+    public void testEnqueueBooleanFlag() throws ThrottleQueueException {
+        final int CAPACITY = 3;
+        ThrottlingQueue<Integer> testQueue = new ThrottlingQueueImpl<>(CAPACITY);
+        boolean flag = true;
+        int i = CAPACITY;
+
+        while (flag) {
+            flag = testQueue.enqueue(i, i);
+            if (i == 1) flag = false;
+            i--;
+        }
+
+        List<Integer> results = new ArrayList<>();
+
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+        results.add(testQueue.dequeue());
+
+        assertEquals(asList(1, 2, 3), results);
     }
 }
