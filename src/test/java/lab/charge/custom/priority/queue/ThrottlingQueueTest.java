@@ -77,6 +77,25 @@ public class ThrottlingQueueTest extends TestCase {
         assertEquals(asList(1, 2, 1, 2, 3, 4), results);
     }
 
+    public void testExampleThree() throws ThrottleQueueException {
+        ThrottlingQueue<Integer> testQueue = new ThrottlingQueueImpl<>(35);
+        List<Integer> seq = asList(4, 1, 3, 2, 1, 4, 2, 3, 2, 4, 1, 3, 3, 5, 2, 1, 3, 6,
+                1, 2, 4, 2, 4, 1, 3, 2, 1, 5, 2, 1, 1, 2, 3, 1, 1);
+        for (Integer i : seq) {
+            testQueue.enqueue(i, i);
+        }
+        List<Integer> resSeq = asList(1, 1, 2, 1, 1, 2, 3, 1, 1, 2, 1, 1, 2, 3, 4, 1, 1,
+                2, 1, 2, 3, 2, 2, 3, 4, 5, 2, 3, 3, 4, 3, 4, 5, 6, 4);
+
+        List<Integer> results = new ArrayList<>();
+
+        for (Integer ignored : seq) {
+            results.add(testQueue.dequeue());
+        }
+
+        assertEquals(resSeq, results);
+    }
+
     public void testSetThrottling() throws ThrottleQueueException {
         ThrottlingQueue<Integer> testQueue = new ThrottlingQueueImpl<>(10);
         testQueue.setThrottleRate(3);
@@ -137,9 +156,9 @@ public class ThrottlingQueueTest extends TestCase {
 
         List<Integer> results = new ArrayList<>();
 
-        results.add(testQueue.dequeue());
-        results.add(testQueue.dequeue());
-        results.add(testQueue.dequeue());
+        for (int j = 0; j < CAPACITY; j++) {
+            results.add(testQueue.dequeue());
+        }
 
         assertEquals(asList(1, 2, 3), results);
     }

@@ -91,7 +91,7 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
         }
     }
 
-    private final Map<T, Integer> throttleCheck;
+    private final Map<Integer, Integer> throttleCheck;
     private final ArrayDeque<ThrottlingQueueEntry<T>> innerState;
 
     public ThrottlingQueueImpl(int capacity) {
@@ -103,7 +103,7 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
                 capacity);
     }
 
-    private ThrottlingQueueImpl(Map<T, Integer> throttleCheck,
+    private ThrottlingQueueImpl(Map<Integer, Integer> throttleCheck,
                                 ArrayDeque<ThrottlingQueueEntry<T>> innerState,
                                 Integer throttleRate,
                                 Integer currentPriority,
@@ -122,7 +122,7 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
             if (innerState.size() == maxCapacity) {
                 throw new ThrottleQueueException(ThrottleConstants.EXCEPTION_QUEUE_FULL.asString());
             }
-            throttleCheck.computeIfPresent(value, (k, integer) -> {
+            throttleCheck.computeIfPresent(priority, (k, integer) -> {
                 if (Objects.equals(throttleCheck.get(k), throttleRate)) {
                     skipNext = true;
                     return integer - 1;
@@ -139,18 +139,20 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
                 throw new ThrottleQueueException(ThrottleConstants.EXCEPTION_QUEUE_EMPTY.asString());
             }
             ThrottlingQueueEntry<T> currentEl = null;
+
+            Set<Integer> priorities = innerState.stream()
+                    .map(ThrottlingQueueEntry::getPriority)
+                    .collect(Collectors.toSet());
+
+            while (!priorities.contains(currentPriority)) currentPriority++;
+
             for (ThrottlingQueueEntry<T> entry : innerState) {
-                throttleCheck.putIfAbsent(entry.getValue(), 0);
-                Integer throttleState = throttleCheck.get(entry.getValue());
-                Set<Integer> priorities = innerState.stream()
-                        .map(ThrottlingQueueEntry::getPriority)
-                        .collect(Collectors.toSet());
-                if (!priorities.contains(currentPriority)) currentPriority++;
-                if (priorities.contains(currentPriority - 1) && !skipNext) currentPriority--;
+                throttleCheck.putIfAbsent(entry.getPriority(), 0);
+                Integer throttleState = throttleCheck.get(entry.getPriority());
                 if (entry.getPriority() == currentPriority) {
                     if (skipNext) currentPriority--;
                     if (throttleState < throttleRate) {
-                        throttleCheck.put(entry.getValue(), throttleState + 1);
+                        throttleCheck.put(entry.getPriority(), throttleState + 1);
                         currentEl = entry;
                         skipNext = false;
                         break;
@@ -158,9 +160,14 @@ public final class ThrottlingQueueImpl<T> implements ThrottlingQueue<T> {
                 }
             }
 
-            if (Objects.equals(throttleCheck.get(requireNonNull(currentEl).getValue()),
+            if (Objects.equals(throttleCheck.get(requireNonNull(currentEl).getPriority()),
                     throttleRate)) {
                 currentPriority++;
+            } else {
+                currentPriority = ThrottleConstants.DEFAULT_PRIORITY.asInteger();
+                for (int i = 1; i < currentEl.getPriority(); i++) {
+                    throttleCheck.remove(i);
+                }
             }
             innerState.remove(requireNonNull(currentEl));
             return currentEl.getValue();
